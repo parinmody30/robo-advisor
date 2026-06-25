@@ -46,45 +46,34 @@ with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/investment-portfolio.png", width=60)
     st.title("Your Profile")
 
-    st.subheader("📋 Capacity")
-    age                   = st.slider("Age", 20, 65, 28)
-    income_stability      = st.selectbox("Income stability",
-                                          [1, 2, 3],
-                                          format_func=lambda x: {1:"Unstable",2:"Moderate",3:"Stable"}[x],
-                                          index=2)
-    dependents            = st.slider("Financial dependents", 0, 5, 0)
-    emergency_months      = st.slider("Emergency fund (months)", 0, 24, 6)
-    horizon_years         = st.slider("Investment horizon (years)", 3, 35, 15)
+    st.subheader("📋 Your Profile")
+    age              = st.slider("Age", 20, 65, 28)
+    income_stability = st.selectbox("Income stability",
+                                     [1, 2, 3],
+                                     format_func=lambda x: {1:"Unstable",2:"Moderate",3:"Stable"}[x],
+                                     index=2)
+    dependents       = st.slider("Financial dependents", 0, 5, 0)
+    horizon_years    = st.slider("Investment horizon (years)", 3, 35, 15)
 
-    st.subheader("🧠 Behaviour")
-    market_drop   = st.selectbox("If portfolio drops 20%, you:",
-                                  [1,2,3],
-                                  format_func=lambda x:{1:"Sell everything",2:"Hold",3:"Buy more"}[x],
-                                  index=2)
-    exp           = st.selectbox("Investing experience",
-                                  [1,2,3],
-                                  format_func=lambda x:{1:"None",2:"Some MFs",3:"Stocks/ETFs"}[x],
-                                  index=1)
-    loss_sleep    = st.selectbox("Portfolio -15%, your sleep:",
-                                  [1,2,3],
-                                  format_func=lambda x:{1:"Badly affected",2:"Uneasy",3:"Fine"}[x],
-                                  index=2)
-    vol_comfort   = st.selectbox("Comfortable with swings of:",
-                                  [1,2,3],
-                                  format_func=lambda x:{1:"<5%",2:"5–15%",3:">15%"}[x],
-                                  index=1)
-    goal_flex     = st.selectbox("Goal timeline flexibility:",
-                                  [1,2,3],
-                                  format_func=lambda x:{1:"Rigid",2:"Somewhat flexible",3:"Flexible"}[x],
-                                  index=1)
+    st.subheader("🧠 Risk Appetite")
+    risk_appetite = st.slider(
+        "How comfortable are you if your portfolio drops 20% temporarily?",
+        min_value=1, max_value=10, value=5,
+        help="1 = Very uncomfortable, sell immediately · 10 = Totally fine, buy more"
+    )
+    st.caption({
+        range(1,  4): "😟 Low — you prefer capital safety over growth",
+        range(4,  7): "😐 Moderate — you can handle some swings",
+        range(7, 11): "😎 High — short-term drops don't worry you",
+    }.get(next((r for r in [range(1,4),range(4,7),range(7,11)] if risk_appetite in r), range(4,7)), ""))
 
     st.subheader("🎯 Goals & Savings")
     monthly_savings = st.number_input("Monthly savings (₹)", 1000, 500000, 25000, step=1000)
 
     st.subheader("📌 Primary Goal")
-    goal_name    = st.text_input("Goal name", "Retirement Corpus")
-    goal_amount  = st.number_input("Target amount today (₹)", 100000, 100000000, 10000000, step=100000)
-    goal_inf     = st.slider("Inflation rate for this goal (%)", 4, 12, 6) / 100
+    goal_name   = st.text_input("Goal name", "Retirement Corpus")
+    goal_amount = st.number_input("Target amount today (₹)", 100000, 100000000, 10000000, step=100000)
+    goal_inf    = 0.06  # defaulted to 6% India average
 
     st.subheader("➕ Additional Goals")
     add_goal2 = st.checkbox("Add Goal 2")
@@ -93,7 +82,7 @@ with st.sidebar:
         goal2_name   = st.text_input("Goal 2 name", "House Down Payment")
         goal2_amount = st.number_input("Goal 2 amount (₹)", 100000, 50000000, 2000000, step=100000)
         goal2_years  = st.slider("Goal 2 horizon (years)", 1, 30, 7)
-        goal2_inf    = st.slider("Goal 2 inflation (%)", 4, 12, 7) / 100
+        goal2_inf    = 0.06  # defaulted
 
     run_btn = st.button("🚀 Generate My Plan", type="primary", use_container_width=True)
 
@@ -114,15 +103,17 @@ if not run_btn:
 with st.spinner("Fetching market data…"):
     prices, mu, cov = load_all(start="2015-01-01")
 
+# Map 1-10 slider to 1-3 scale used by risk_profiler for each tolerance question
+_t = round(1 + (risk_appetite - 1) * 2 / 9)  # 1→1, 5→2, 10→3
 tolerance_answers = {
-    "market_drop_reaction": market_drop,
-    "past_investing_exp":   exp,
-    "loss_sleep":           loss_sleep,
-    "volatility_comfort":   vol_comfort,
-    "goal_flexibility":     goal_flex,
+    "market_drop_reaction": _t,
+    "past_investing_exp":   _t,
+    "loss_sleep":           _t,
+    "volatility_comfort":   _t,
+    "goal_flexibility":     _t,
 }
 profile = build_profile(age, income_stability, dependents,
-                         emergency_months, horizon_years, tolerance_answers)
+                         6, horizon_years, tolerance_answers)
 
 goals_input = [{
     "name": goal_name, "target_amount": goal_amount,
