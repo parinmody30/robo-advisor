@@ -145,6 +145,8 @@ class StockInfo:
     current_ratio:  float = np.nan
     # Factor 6 — Momentum
     momentum_6m:    float = np.nan
+    # Price data
+    current_price:  float = np.nan
     # Output
     score:          float = np.nan
 
@@ -166,6 +168,16 @@ def _fetch_fundamentals(ticker: str) -> dict:
     except Exception:
         return {k: np.nan for k in ["beta","pe","ev_ebitda","pb","roe",
                                      "net_margin","revenue_growth","de","current_ratio"]}
+
+
+def _fetch_current_price(ticker: str) -> float:
+    try:
+        hist = yf.download(ticker, period="5d", auto_adjust=True, progress=False)
+        if hist.empty:
+            return np.nan
+        return float(hist["Close"].squeeze().iloc[-1])
+    except Exception:
+        return np.nan
 
 
 def _fetch_momentum(ticker: str, months: int = 6) -> float:
@@ -203,6 +215,7 @@ def fetch_stock_universe(persona: str) -> list[StockInfo]:
         s.de             = f["de"] / 100 if not np.isnan(f["de"]) else np.nan
         s.current_ratio  = f["current_ratio"]
         s.momentum_6m    = _fetch_momentum(s.ticker)
+        s.current_price  = _fetch_current_price(s.ticker)
 
     return universe
 
@@ -350,5 +363,33 @@ def build_equity_basket(
     else:
         df["monthly_amt_inr"] = 0
 
+    # Shares per month + affordability status
+    def _shares_and_status(row):
+        price = row.get("current_price", np.nan)
+        amt   = row.get("monthly_amt_inr", 0)
+        if pd.isna(price) or price <= 0:
+            return pd.Series({"shares_per_month": 0, "months_to_accumulate": 0,
+                               "actual_invest_inr": amt, "status": "⚠️ Price N/A"})
+        shares = int(amt // price)
+        if shares >= 1:
+            actual = int(shares * price)
+            leftover = int(amt - actual)
+            return pd.Series({
+                "shares_per_month":    shares,
+                "months_to_accumulate": 0,
+                "actual_invest_inr":   actual,
+                "status": f"✅ Buy {shares} share{'s' if shares>1 else ''} (₹{leftover:,} rolls over)",
+            })
+        else:
+            months_needed = int(np.ceil(price / amt)) if amt > 0 else 999
+            return pd.Series({
+                "shares_per_month":    0,
+                "months_to_accumulate": months_needed,
+                "actual_invest_inr":   0,
+                "status": f"⏳ Accumulate {months_needed} months (price ₹{price:,.0f})",
+            })
+
+    extra = df.apply(_shares_and_status, axis=1)
+    df = pd.concat([df, extra], axis=1)
     df = df.drop(columns=["score_adj"])
     return df

@@ -279,16 +279,22 @@ with t2:
                 lambda x: f"₹{int(x):,}"
             )
 
-            show = ["name","tier","beta","pe","ev_ebitda","pb",
+            if "current_price" in display.columns:
+                display["current_price"] = display["current_price"].apply(
+                    lambda x: f"₹{x:,.0f}" if not pd.isna(x) else "—"
+                )
+
+            show = ["name","tier","current_price","beta","pe","ev_ebitda","pb",
                     "roe","net_margin","revenue_growth",
                     "de","current_ratio","momentum_6m",
-                    "portfolio_weight_pct","monthly_amt_inr"]
+                    "portfolio_weight_pct","monthly_amt_inr","status"]
             show = [c for c in show if c in display.columns]
 
             st.dataframe(
                 display[show].rename(columns={
                     "name":                "Company",
                     "tier":                "Cap",
+                    "current_price":       "Price",
                     "beta":                "Beta",
                     "pe":                  "P/E",
                     "ev_ebitda":           "EV/EBITDA",
@@ -300,11 +306,25 @@ with t2:
                     "current_ratio":       "Curr Ratio",
                     "momentum_6m":         "6m Return",
                     "portfolio_weight_pct":"Portfolio %",
-                    "monthly_amt_inr":     "Invest/Month",
+                    "monthly_amt_inr":     "Alloc/Month",
+                    "status":              "Action",
                 }),
                 use_container_width=True,
                 hide_index=False,
             )
+
+            # Summary: how much actually gets invested vs rolls over
+            if "actual_invest_inr" in basket.columns:
+                total_investable = basket["actual_invest_inr"].sum()
+                total_alloc      = basket["monthly_amt_inr"].sum()
+                rollover         = int(total_alloc - total_investable)
+                accumulate_count = int((basket["shares_per_month"] == 0).sum())
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Actually invested/month", f"₹{total_investable:,}")
+                c2.metric("Rolls to liquid fund",    f"₹{rollover:,}",
+                          help="Accumulates until enough for next share purchase")
+                c3.metric("Stocks accumulating",     f"{accumulate_count}",
+                          help="Stocks where monthly alloc < 1 share price")
         except Exception as e:
             st.warning(f"Stock screening skipped: {e}")
 
