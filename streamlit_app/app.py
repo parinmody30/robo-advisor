@@ -67,7 +67,19 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 [data-testid="stSidebar"] input {
     background: rgba(255,255,255,0.07) !important;
     border: 1px solid rgba(129,140,248,0.35) !important;
-    border-radius: 8px !important; color: #EEF2FF !important;
+    border-radius: 8px !important;
+    color: #EEF2FF !important;
+    -webkit-text-fill-color: #EEF2FF !important;
+    caret-color: #818CF8 !important;
+}
+[data-testid="stSidebar"] input::placeholder {
+    color: rgba(165,180,252,0.4) !important;
+    -webkit-text-fill-color: rgba(165,180,252,0.4) !important;
+}
+/* number input spin buttons */
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+    color: #EEF2FF !important;
+    -webkit-text-fill-color: #EEF2FF !important;
 }
 [data-testid="stSidebar"] input:focus,
 [data-testid="stSidebar"] [data-baseweb="select"] > div:focus-within {
