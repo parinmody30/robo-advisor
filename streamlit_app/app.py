@@ -287,7 +287,7 @@ with t2:
             show = ["name","tier","current_price","beta","pe","ev_ebitda","pb",
                     "roe","net_margin","revenue_growth",
                     "de","current_ratio","momentum_6m",
-                    "portfolio_weight_pct","monthly_amt_inr","status"]
+                    "portfolio_weight_pct","monthly_amt_inr","action"]
             show = [c for c in show if c in display.columns]
 
             st.dataframe(
@@ -307,24 +307,61 @@ with t2:
                     "momentum_6m":         "6m Return",
                     "portfolio_weight_pct":"Portfolio %",
                     "monthly_amt_inr":     "Alloc/Month",
-                    "status":              "Action",
+                    "action":              "Action / Alternative",
                 }),
                 use_container_width=True,
                 hide_index=False,
+                column_config={
+                    "Action / Alternative": st.column_config.TextColumn(width="large"),
+                }
             )
 
-            # Summary: how much actually gets invested vs rolls over
+            # Summary metrics
             if "actual_invest_inr" in basket.columns:
-                total_investable = basket["actual_invest_inr"].sum()
-                total_alloc      = basket["monthly_amt_inr"].sum()
-                rollover         = int(total_alloc - total_investable)
-                accumulate_count = int((basket["shares_per_month"] == 0).sum())
+                total_investable   = basket["actual_invest_inr"].sum()
+                total_alloc        = basket["monthly_amt_inr"].sum()
+                rollover           = int(total_alloc - total_investable)
+                unaffordable_count = int((basket.get("affordable", pd.Series([True]*len(basket))) == False).sum())
                 c1, c2, c3 = st.columns(3)
-                c1.metric("Actually invested/month", f"₹{total_investable:,}")
-                c2.metric("Rolls to liquid fund",    f"₹{rollover:,}",
-                          help="Accumulates until enough for next share purchase")
-                c3.metric("Stocks accumulating",     f"{accumulate_count}",
-                          help="Stocks where monthly alloc < 1 share price")
+                c1.metric("Investable this month",  f"₹{int(total_investable):,}")
+                c2.metric("Accumulation pool",       f"₹{rollover:,}",
+                          help="Rolls to liquid fund until enough for next share purchase")
+                c3.metric("Stocks need a decision",  f"{unaffordable_count}",
+                          help="Choose: accumulate over months OR switch to sector ETF")
+
+            # Side-by-side decision cards for unaffordable stocks
+            if "affordable" in basket.columns:
+                unaffordable = basket[basket["affordable"] == False]
+                if not unaffordable.empty:
+                    with st.expander(f"📋 {len(unaffordable)} stock(s) where monthly allocation < share price — pick an option"):
+                        for _, row in unaffordable.iterrows():
+                            name   = row.get("name", "")
+                            price  = row.get("current_price", 0)
+                            amt    = row.get("monthly_amt_inr", 0)
+                            months = row.get("months_to_accumulate", 0)
+                            etf    = row.get("etf_name", "")
+                            etf_t  = row.get("etf_ticker", "")
+                            reason = row.get("etf_reason", "")
+
+                            st.markdown(f"#### {name}")
+                            st.caption(f"Share price: ₹{price:,.0f}  ·  Your monthly allocation: ₹{amt:,}")
+                            col_a, col_b = st.columns(2)
+                            with col_a:
+                                st.info(
+                                    f"**⏳ Option A — Accumulate & buy directly**\n\n"
+                                    f"Park ₹{amt:,}/month in a liquid fund for "
+                                    f"**{months} month{'s' if months>1 else ''}**, then "
+                                    f"buy 1 share of {name}.\n\n"
+                                    f"*Best if you want this specific stock in your portfolio.*"
+                                )
+                            with col_b:
+                                st.success(
+                                    f"**💡 Option B — Start SIP in sector ETF now**\n\n"
+                                    f"Invest ₹{amt:,}/month in **{etf}** ({etf_t}).\n\n"
+                                    f"{reason}\n\n"
+                                    f"*Best for immediate exposure — no waiting, ₹1 minimum.*"
+                                )
+                            st.divider()
         except Exception as e:
             st.warning(f"Stock screening skipped: {e}")
 

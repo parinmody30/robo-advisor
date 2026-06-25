@@ -329,6 +329,69 @@ def screen_stocks(persona: str, universe: list[StockInfo] = None) -> pd.DataFram
     return df
 
 
+# ── Sector ETF alternatives ───────────────────────────────────────────────────
+# When a stock is unaffordable, we suggest the closest sector ETF.
+# All ETFs trade at ₹100–₹700, always affordable for SIP.
+
+STOCK_TO_ETF = {
+    # IT
+    "TCS":                  ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "Infosys":              ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "HCL Technologies":     ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "Wipro":                ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "Persistent Systems":   ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "Coforge":              ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "Happiest Minds":       ("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    "Latent View Analytics":("Nifty IT ETF (ITBEES)",        "ITBEES.NS",    "Same IT sector exposure, ₹500 min SIP"),
+    # Banking & Finance
+    "HDFC Bank":            ("Nifty Bank ETF (BANKBEES)",    "BANKBEES.NS",  "Banking sector, ₹500 min SIP"),
+    "ICICI Bank":           ("Nifty Bank ETF (BANKBEES)",    "BANKBEES.NS",  "Banking sector, ₹500 min SIP"),
+    "Kotak Mahindra Bank":  ("Nifty Bank ETF (BANKBEES)",    "BANKBEES.NS",  "Banking sector, ₹500 min SIP"),
+    "Axis Bank":            ("Nifty Bank ETF (BANKBEES)",    "BANKBEES.NS",  "Banking sector, ₹500 min SIP"),
+    "State Bank of India":  ("Nifty Bank ETF (BANKBEES)",    "BANKBEES.NS",  "Banking sector, ₹500 min SIP"),
+    "Bajaj Finance":        ("Nifty Financial Svcs ETF",     "NETFNIFTY.NS", "Financial services exposure"),
+    "Muthoot Finance":      ("Nifty Financial Svcs ETF",     "NETFNIFTY.NS", "Financial services exposure"),
+    "Chola Finance":        ("Nifty Financial Svcs ETF",     "NETFNIFTY.NS", "Financial services exposure"),
+    # Pharma
+    "Sun Pharma":           ("Nifty Pharma ETF (PHARMABEES)","PHARMABEES.NS","Pharma sector, ₹500 min SIP"),
+    "Cipla":                ("Nifty Pharma ETF (PHARMABEES)","PHARMABEES.NS","Pharma sector, ₹500 min SIP"),
+    "Dr. Reddy's":          ("Nifty Pharma ETF (PHARMABEES)","PHARMABEES.NS","Pharma sector, ₹500 min SIP"),
+    # FMCG
+    "Hindustan Unilever":   ("Nifty FMCG ETF (FMCGIETF)",   "FMCGIETF.NS",  "FMCG sector, ₹500 min SIP"),
+    "ITC":                  ("Nifty FMCG ETF (FMCGIETF)",   "FMCGIETF.NS",  "FMCG sector, ₹500 min SIP"),
+    "Nestle India":         ("Nifty FMCG ETF (FMCGIETF)",   "FMCGIETF.NS",  "FMCG sector, ₹500 min SIP"),
+    "Britannia":            ("Nifty FMCG ETF (FMCGIETF)",   "FMCGIETF.NS",  "FMCG sector, ₹500 min SIP"),
+    # Auto
+    "Maruti Suzuki":        ("Nifty Auto ETF (AUTOIETF)",   "AUTOIETF.NS",  "Auto sector exposure"),
+    "Tata Motors":          ("Nifty Auto ETF (AUTOIETF)",   "AUTOIETF.NS",  "Auto sector exposure"),
+    "Bajaj Auto":           ("Nifty Auto ETF (AUTOIETF)",   "AUTOIETF.NS",  "Auto sector exposure"),
+    # Metals
+    "Tata Steel":           ("Nifty Metal ETF (METALIETF)", "METALIETF.NS", "Metals & mining exposure"),
+    "JSW Steel":            ("Nifty Metal ETF (METALIETF)", "METALIETF.NS", "Metals & mining exposure"),
+    # Large cap fallback
+    "Reliance Industries":  ("Nifty 50 ETF (NIFTYBEES)",    "NIFTYBEES.NS", "Broad large-cap exposure"),
+    "Larsen & Toubro":      ("Nifty 50 ETF (NIFTYBEES)",    "NIFTYBEES.NS", "Broad large-cap exposure"),
+    "Bharti Airtel":        ("Nifty 50 ETF (NIFTYBEES)",    "NIFTYBEES.NS", "Broad large-cap exposure"),
+    "Asian Paints":         ("Nifty 50 ETF (NIFTYBEES)",    "NIFTYBEES.NS", "Broad large-cap exposure"),
+    "Titan Company":        ("Nifty 50 ETF (NIFTYBEES)",    "NIFTYBEES.NS", "Broad large-cap exposure"),
+    "UltraTech Cement":     ("Nifty 50 ETF (NIFTYBEES)",    "NIFTYBEES.NS", "Broad large-cap exposure"),
+    # Mid cap fallback
+    "Trent":                ("Nifty Next 50 ETF (JUNIORBEES)","JUNIORBEES.NS","Mid-large cap exposure"),
+    "Voltas":               ("Nifty Next 50 ETF (JUNIORBEES)","JUNIORBEES.NS","Mid-large cap exposure"),
+    "Apollo Hospitals":     ("Nifty Next 50 ETF (JUNIORBEES)","JUNIORBEES.NS","Mid-large cap exposure"),
+    "Max Healthcare":       ("Nifty Next 50 ETF (JUNIORBEES)","JUNIORBEES.NS","Mid-large cap exposure"),
+    "Polycab India":        ("Nifty Next 50 ETF (JUNIORBEES)","JUNIORBEES.NS","Mid-large cap exposure"),
+    "Dixon Technologies":   ("Nifty Midcap 150 ETF",        "MID150BEES.NS","Midcap exposure"),
+    "Kaynes Technology":    ("Nifty Midcap 150 ETF",        "MID150BEES.NS","Midcap exposure"),
+}
+ETF_FALLBACK = ("Nifty 50 ETF (NIFTYBEES)", "NIFTYBEES.NS", "Broad market exposure, ₹500 min SIP")
+
+
+def get_etf_alternative(stock_name: str) -> tuple:
+    """Returns (etf_name, etf_ticker, reason) for a given stock."""
+    return STOCK_TO_ETF.get(stock_name, ETF_FALLBACK)
+
+
 # ── Score-weighted basket ─────────────────────────────────────────────────────
 
 def build_equity_basket(
@@ -363,33 +426,60 @@ def build_equity_basket(
     else:
         df["monthly_amt_inr"] = 0
 
-    # Shares per month + affordability status
-    def _shares_and_status(row):
+    # Shares per month + affordability + ETF alternative for unaffordable stocks
+    def _affordability(row):
         price = row.get("current_price", np.nan)
         amt   = row.get("monthly_amt_inr", 0)
+        name  = row.get("name", "")
+
         if pd.isna(price) or price <= 0:
-            return pd.Series({"shares_per_month": 0, "months_to_accumulate": 0,
-                               "actual_invest_inr": amt, "status": "⚠️ Price N/A"})
+            etf_name, etf_ticker, etf_reason = get_etf_alternative(name)
+            return pd.Series({
+                "shares_per_month":    0,
+                "months_to_accumulate": 0,
+                "actual_invest_inr":   amt,
+                "affordable":          False,
+                "etf_name":            etf_name,
+                "etf_ticker":          etf_ticker,
+                "etf_reason":          etf_reason,
+                "action":              "⚠️ Price unavailable",
+            })
+
         shares = int(amt // price)
+
         if shares >= 1:
-            actual = int(shares * price)
+            actual   = int(shares * price)
             leftover = int(amt - actual)
             return pd.Series({
                 "shares_per_month":    shares,
                 "months_to_accumulate": 0,
                 "actual_invest_inr":   actual,
-                "status": f"✅ Buy {shares} share{'s' if shares>1 else ''} (₹{leftover:,} rolls over)",
+                "affordable":          True,
+                "etf_name":            "",
+                "etf_ticker":          "",
+                "etf_reason":          "",
+                "action":              f"✅ Buy {shares} share{'s' if shares>1 else ''}"
+                                       + (f" · ₹{leftover:,} rolls over" if leftover > 0 else ""),
             })
         else:
             months_needed = int(np.ceil(price / amt)) if amt > 0 else 999
+            etf_name, etf_ticker, etf_reason = get_etf_alternative(name)
             return pd.Series({
                 "shares_per_month":    0,
                 "months_to_accumulate": months_needed,
                 "actual_invest_inr":   0,
-                "status": f"⏳ Accumulate {months_needed} months (price ₹{price:,.0f})",
+                "affordable":          False,
+                "etf_name":            etf_name,
+                "etf_ticker":          etf_ticker,
+                "etf_reason":          etf_reason,
+                "action":              (
+                    f"⏳ Option A: Accumulate {months_needed} month{'s' if months_needed>1 else ''} "
+                    f"(price ₹{price:,.0f})  |  "
+                    f"💡 Option B: SIP into {etf_name}"
+                ),
             })
 
-    extra = df.apply(_shares_and_status, axis=1)
+    extra = df.apply(_affordability, axis=1)
     df = pd.concat([df, extra], axis=1)
     df = df.drop(columns=["score_adj"])
     return df
