@@ -31,35 +31,35 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0D1B2A 0%, #1B2B3B 100%);
-    border-right: 1px solid #1e3a5f;
+    background: linear-gradient(180deg, #1E1B4B 0%, #312E81 100%);
+    border-right: 1px solid #3730A3;
 }
-[data-testid="stSidebar"] * { color: #CBD5E1 !important; }
+[data-testid="stSidebar"] * { color: #C7D2FE !important; }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 { color: #F1F5F9 !important; letter-spacing: 0.02em; }
+[data-testid="stSidebar"] h3 { color: #EEF2FF !important; letter-spacing: 0.02em; }
 [data-testid="stSidebar"] .stSlider > label,
 [data-testid="stSidebar"] .stSelectbox > label,
 [data-testid="stSidebar"] .stNumberInput > label,
-[data-testid="stSidebar"] .stTextInput > label { color: #94A3B8 !important; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+[data-testid="stSidebar"] .stTextInput > label { color: #A5B4FC !important; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] input {
-    background: #1e3a5f !important; border-color: #2d5180 !important; color: #F1F5F9 !important;
+    background: #3730A3 !important; border-color: #4F46E5 !important; color: #EEF2FF !important;
 }
 [data-testid="stSidebar"] .stButton > button {
-    background: linear-gradient(135deg, #1565C0, #0D47A1) !important;
+    background: linear-gradient(135deg, #4F46E5, #4338CA) !important;
     color: white !important; border: none !important;
     border-radius: 10px !important; font-weight: 600 !important;
     font-size: 0.95rem !important; padding: 0.6rem 1rem !important;
     letter-spacing: 0.03em !important;
-    box-shadow: 0 4px 14px rgba(21,101,192,0.4) !important;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.45) !important;
     transition: all 0.2s !important;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 20px rgba(21,101,192,0.5) !important;
+    box-shadow: 0 6px 20px rgba(79,70,229,0.6) !important;
 }
-[data-testid="stSidebar"] hr { border-color: #1e3a5f !important; }
+[data-testid="stSidebar"] hr { border-color: #3730A3 !important; }
 
 /* ── Main background ── */
 [data-testid="stAppViewContainer"] > .main { background: #F8FAFC; }
@@ -67,12 +67,12 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 
 /* ── Hero header ── */
 .hero {
-    background: linear-gradient(135deg, #0D1B2A 0%, #1565C0 60%, #1976D2 100%);
+    background: linear-gradient(135deg, #1E1B4B 0%, #4F46E5 55%, #14B8A6 100%);
     border-radius: 16px; padding: 36px 40px; margin-bottom: 28px;
-    box-shadow: 0 8px 32px rgba(13,27,42,0.18);
+    box-shadow: 0 8px 32px rgba(79,70,229,0.25);
 }
 .hero h1 { color: #fff; font-size: 2rem; font-weight: 700; margin: 0 0 6px 0; letter-spacing: -0.02em; }
-.hero p  { color: #90CAF9; margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; }
+.hero p  { color: #C7D2FE; margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; }
 
 /* ── Stat chips on landing ── */
 .chip-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
@@ -96,9 +96,9 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 
 /* ── Section headers ── */
 .section-title {
-    font-size: 1.05rem; font-weight: 700; color: #0F172A;
+    font-size: 1.05rem; font-weight: 700; color: #111827;
     letter-spacing: -0.01em; margin: 28px 0 14px 0;
-    padding-bottom: 8px; border-bottom: 2px solid #E2E8F0;
+    padding-bottom: 8px; border-bottom: 2px solid #4F46E5;
 }
 
 /* ── Persona badge ── */
@@ -106,8 +106,8 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
     border-radius: 14px; padding: 22px 26px;
     border-left: 5px solid; margin-top: 8px;
 }
-.persona-conservative { background:#F0FDF4; border-color:#22C55E; }
-.persona-balanced     { background:#EFF6FF; border-color:#3B82F6; }
+.persona-conservative { background:#F0FDFA; border-color:#14B8A6; }
+.persona-balanced     { background:#EEF2FF; border-color:#4F46E5; }
 .persona-aggressive   { background:#FFF7ED; border-color:#F97316; }
 .persona-name  { font-size: 1.3rem; font-weight: 700; color: #0F172A; margin: 0 0 6px 0; }
 .persona-meta  { font-size: 0.85rem; color: #64748B; line-height: 1.7; }
@@ -135,8 +135,8 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
     color: #64748B; padding: 8px 18px;
 }
 .stTabs [aria-selected="true"] {
-    background: #fff !important; color: #1565C0 !important;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    background: #fff !important; color: #4F46E5 !important;
+    box-shadow: 0 1px 6px rgba(79,70,229,0.12);
 }
 
 /* ── Dataframe ── */
@@ -316,7 +316,7 @@ with t1:
         fig = go.Figure(go.Bar(
             x=["Capacity", "Tolerance", "Combined"],
             y=[profile.capacity_score, profile.tolerance_score, profile.combined_score],
-            marker_color=["#22C55E", "#3B82F6", "#F97316"],
+            marker_color=["#14B8A6", "#4F46E5", "#F97316"],
             text=[f"{v:.1f}" for v in [profile.capacity_score, profile.tolerance_score, profile.combined_score]],
             textposition="outside",
         ))
@@ -412,7 +412,7 @@ with t2:
     fig3 = go.Figure()
     fig3.add_trace(go.Scatter(x=frontier["volatility"]*100, y=frontier["return"]*100,
                                mode="lines", name="Efficient Frontier",
-                               line=dict(color="#1565C0", width=3)))
+                               line=dict(color="#4F46E5", width=3)))
     fig3.add_trace(go.Scatter(x=[opt["volatility"]*100], y=[opt["expected_return"]*100],
                                mode="markers+text", name="Your Portfolio",
                                marker=dict(size=14, color="#EF4444", symbol="star"),
@@ -552,13 +552,13 @@ with t3:
     g_names = [g.name for g in planned_goals]
     sips    = [g.monthly_sip for g in planned_goals]
     feas    = [g.feasibility_pct for g in planned_goals]
-    colors_g = ["#2E7D32" if f>=100 else "#E65100" if f<50 else "#F9A825" for f in feas]
+    colors_g = ["#14B8A6" if f>=100 else "#E65100" if f<50 else "#F9A825" for f in feas]
 
     col1, col2 = st.columns(2)
     with col1:
         fig4 = go.Figure(go.Bar(x=g_names, y=sips, marker_color=colors_g,
                                  text=[f"₹{v:,.0f}" for v in sips], textposition="outside"))
-        fig4.add_hline(y=monthly_savings, line_dash="dash", line_color="#1565C0",
+        fig4.add_hline(y=monthly_savings, line_dash="dash", line_color="#4F46E5",
                        annotation_text=f"Your savings ₹{monthly_savings:,}/mo")
         fig4.update_layout(title="SIP Required vs Your Savings",
                            yaxis_title="₹/month", plot_bgcolor="#fff", paper_bgcolor="#fff", height=400)
@@ -592,21 +592,21 @@ with t4:
     fig6.add_trace(go.Scatter(
         x=list(years)+list(years[::-1]),
         y=list(p["p90"])+list(p["p10"][::-1]),
-        fill="toself", fillcolor="rgba(21,101,192,0.10)",
+        fill="toself", fillcolor="rgba(79,70,229,0.10)",
         line=dict(color="rgba(0,0,0,0)"), name="10–90th pct",
     ))
     fig6.add_trace(go.Scatter(
         x=list(years)+list(years[::-1]),
         y=list(p["p75"])+list(p["p25"][::-1]),
-        fill="toself", fillcolor="rgba(21,101,192,0.22)",
+        fill="toself", fillcolor="rgba(79,70,229,0.22)",
         line=dict(color="rgba(0,0,0,0)"), name="25–75th pct",
     ))
     fig6.add_trace(go.Scatter(x=years, y=p["p50"], mode="lines",
-                               name="Median", line=dict(color="#1565C0", width=3)))
+                               name="Median", line=dict(color="#4F46E5", width=3)))
     fig6.add_trace(go.Scatter(x=years, y=mc.stress_percentiles["p50"],
                                mode="lines", name="Median (post-crash)",
-                               line=dict(color="#E53935", width=2, dash="dot")))
-    fig6.add_hline(y=primary.future_value, line_dash="dash", line_color="#388E3C",
+                               line=dict(color="#F43F5E", width=2, dash="dot")))
+    fig6.add_hline(y=primary.future_value, line_dash="dash", line_color="#14B8A6",
                    annotation_text=f"Target ₹{primary.future_value/1e5:.0f}L")
     fig6.update_layout(
         title=f"{primary.name} — Monte Carlo Projection ({mc.prob_success}% success)",
@@ -617,8 +617,8 @@ with t4:
 
     # Histogram
     fig7 = go.Figure(go.Histogram(x=mc.terminal_values/1e5, nbinsx=80,
-                                   marker_color="#1565C0", opacity=0.75))
-    fig7.add_vline(x=primary.future_value/1e5, line_dash="dash", line_color="#E53935",
+                                   marker_color="#4F46E5", opacity=0.75))
+    fig7.add_vline(x=primary.future_value/1e5, line_dash="dash", line_color="#F43F5E",
                    annotation_text="Target")
     fig7.update_layout(title="Terminal Wealth Distribution",
                        xaxis_title="₹ Lakhs", yaxis_title="# simulations",
@@ -632,11 +632,11 @@ with t5:
         fig8 = go.Figure()
         fig8.add_trace(go.Scatter(x=glide.years, y=glide.equity_pct,
                                    name="Equity %", mode="lines",
-                                   line=dict(color="#1565C0", width=3),
-                                   fill="tozeroy", fillcolor="rgba(21,101,192,0.12)"))
+                                   line=dict(color="#4F46E5", width=3),
+                                   fill="tozeroy", fillcolor="rgba(79,70,229,0.12)"))
         fig8.add_trace(go.Scatter(x=glide.years, y=glide.debt_pct,
                                    name="Debt + Fixed %", mode="lines",
-                                   line=dict(color="#2E7D32", width=3),
+                                   line=dict(color="#14B8A6", width=3),
                                    fill="tozeroy", fillcolor="rgba(46,125,50,0.12)"))
         fig8.update_layout(title="Glide Path",
                            xaxis_title="Years", yaxis_title="Allocation %",
@@ -676,11 +676,11 @@ with t5:
     fig9.add_trace(go.Bar(name="Target",
                            x=[ASSET_LABELS.get(a,a) for a in assets_d],
                            y=[opt["weights"].get(a,0)*100 for a in assets_d],
-                           marker_color="#1565C0", opacity=0.85))
+                           marker_color="#4F46E5", opacity=0.85))
     fig9.add_trace(go.Bar(name=f"After {bull_years}yr bull",
                            x=[ASSET_LABELS.get(a,a) for a in assets_d],
                            y=[drifted.get(a,0)*100 for a in assets_d],
-                           marker_color="#E53935", opacity=0.85))
+                           marker_color="#F43F5E", opacity=0.85))
     fig9.update_layout(barmode="group", title="Portfolio Drift",
                        xaxis_tickangle=-35, yaxis_title="Weight %",
                        plot_bgcolor="#fff", paper_bgcolor="#fff", height=420)
