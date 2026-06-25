@@ -222,8 +222,11 @@ with t2:
 
     with col2:
         st.subheader("Allocation breakdown")
-        rows = [{"Asset": ASSET_LABELS.get(k,k), "Weight": f"{v*100:.1f}%"}
-                for k,v in sorted(opt["weights"].items(), key=lambda x:-x[1]) if v > 0.005]
+        rows = [{
+            "Asset":        ASSET_LABELS.get(k, k),
+            "Weight":       f"{v*100:.1f}%",
+            "Monthly (₹)":  f"₹{v*monthly_savings:,.0f}",
+        } for k, v in sorted(opt["weights"].items(), key=lambda x: -x[1]) if v > 0.005]
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
     # Efficient frontier
@@ -248,14 +251,38 @@ with t2:
         try:
             universe = fetch_stock_universe(profile.persona)
             screened = screen_stocks(profile.persona, universe)
-            basket   = build_equity_basket(screened, eq_pct)
-            show_cols = ["name","tier","beta","pe","momentum_6m","portfolio_weight_pct"]
-            show_cols = [c for c in show_cols if c in basket.columns]
-            st.dataframe(basket[show_cols].rename(columns={
-                "name":"Company","tier":"Cap","beta":"Beta",
-                "pe":"P/E","momentum_6m":"6m Return",
-                "portfolio_weight_pct":"Portfolio %"
-            }), use_container_width=True, hide_index=False)
+            basket   = build_equity_basket(screened, eq_pct, monthly_savings)
+
+            display = basket[[
+                "name", "tier", "beta", "pe", "momentum_6m",
+                "equity_weight_pct", "portfolio_weight_pct", "monthly_amt_inr"
+            ]].copy()
+            display["momentum_6m"] = display["momentum_6m"].apply(
+                lambda x: f"{x*100:.1f}%" if not pd.isna(x) else "—"
+            )
+            display["beta"] = display["beta"].apply(
+                lambda x: f"{x:.2f}" if not pd.isna(x) else "—"
+            )
+            display["pe"] = display["pe"].apply(
+                lambda x: f"{x:.1f}" if not pd.isna(x) else "—"
+            )
+            display["monthly_amt_inr"] = display["monthly_amt_inr"].apply(
+                lambda x: f"₹{x:,}"
+            )
+            st.dataframe(
+                display.rename(columns={
+                    "name":                "Company",
+                    "tier":                "Cap",
+                    "beta":                "Beta",
+                    "pe":                  "P/E",
+                    "momentum_6m":         "6m Return",
+                    "equity_weight_pct":   "Equity %",
+                    "portfolio_weight_pct":"Portfolio %",
+                    "monthly_amt_inr":     "Invest/Month",
+                }),
+                use_container_width=True,
+                hide_index=False,
+            )
         except Exception as e:
             st.warning(f"Stock screening skipped: {e}")
 

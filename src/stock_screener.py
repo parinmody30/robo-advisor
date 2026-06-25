@@ -142,11 +142,12 @@ def _fetch_fundamentals(ticker: str) -> dict:
 
 def _fetch_momentum(ticker: str, months: int = 6) -> float:
     try:
-        hist = yf.download(ticker, period=f"{months}mo",
-                           auto_adjust=True, progress=False)["Close"]
-        if len(hist) < 2:
+        hist = yf.download(ticker, period="6mo",
+                           auto_adjust=True, progress=False)
+        if hist.empty or len(hist) < 2:
             return np.nan
-        return float((hist.iloc[-1] / hist.iloc[0]) - 1)
+        close = hist["Close"].squeeze()
+        return float((close.iloc[-1] / close.iloc[0]) - 1)
     except Exception:
         return np.nan
 
@@ -228,16 +229,39 @@ def screen_stocks(persona: str, universe: list[StockInfo] = None) -> pd.DataFram
     return df
 
 
-# ── Equal-weight basket for display ──────────────────────────────────────────
+# ── Score-weighted basket ─────────────────────────────────────────────────────
 
-def build_equity_basket(screened_df: pd.DataFrame,
-                        equity_allocation_pct: float) -> pd.DataFrame:
+def build_equity_basket(
+    screened_df: pd.DataFrame,
+    equity_allocation_pct: float,
+    monthly_investment: float = 0,
+) -> pd.DataFrame:
     """
-    Takes the screened stocks and splits the equity_allocation_pct equally.
-    Returns df with a 'portfolio_weight' column (% of total portfolio).
+    Score-weighted allocation: stocks with higher composite scores get
+    proportionally larger allocations within the equity bucket.
+
+    Args:
+        screened_df          : output of screen_stocks()
+        equity_allocation_pct: % of total portfolio in equity (e.g. 57.0)
+        monthly_investment   : total monthly SIP in ₹ — used to show ₹ amounts
     """
-    n = len(screened_df)
-    screened_df = screened_df.copy()
-    screened_df["equity_weight_pct"]    = round(100 / n, 2)
-    screened_df["portfolio_weight_pct"] = round(equity_allocation_pct / n, 2)
-    return screened_df
+    df = screened_df.copy()
+
+    # Shift scores to be strictly positive before normalising
+    min_score = df["score"].min()
+    shift = abs(min_score) + 1 if min_score <= 0 else 0
+    df["score_adj"] = df["score"] + shift
+
+    # Normalise to get weights within equity bucket
+    total_score = df["score_adj"].sum()
+    df["equity_weight_pct"]    = (df["score_adj"] / total_score * 100).round(2)
+    df["portfolio_weight_pct"] = (df["equity_weight_pct"] * equity_allocation_pct / 100).round(2)
+
+    # ₹ amounts
+    if monthly_investment > 0:
+        df["monthly_amt_inr"] = (df["portfolio_weight_pct"] / 100 * monthly_investment).round(0).astype(int)
+    else:
+        df["monthly_amt_inr"] = 0
+
+    df = df.drop(columns=["score_adj"])
+    return df
