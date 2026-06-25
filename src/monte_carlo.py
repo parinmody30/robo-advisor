@@ -43,13 +43,20 @@ def _block_bootstrap_returns(
         rng = np.random.default_rng(42)
 
     T = len(annual_returns)
-    paths = np.zeros((n_sims, n_years))
 
+    # Fall back to single-sample bootstrap if history too short for blocks
+    effective_block = block_size if T > block_size else 1
+
+    paths = np.zeros((n_sims, n_years))
     for i in range(n_sims):
         sampled = []
         while len(sampled) < n_years:
-            start = rng.integers(0, T - block_size + 1)
-            sampled.extend(annual_returns[start: start + block_size].tolist())
+            if effective_block == 1:
+                idx = rng.integers(0, T)
+                sampled.append(float(annual_returns[idx]))
+            else:
+                start = rng.integers(0, T - effective_block + 1)
+                sampled.extend(annual_returns[start: start + effective_block].tolist())
         paths[i] = sampled[:n_years]
 
     return paths
@@ -78,7 +85,15 @@ def _portfolio_annual_returns(
     synth_annual = sum(synthetic_assets[k] * w for k, w in synth_weights.items())
     annual_total = annual_live + synth_annual
 
-    return annual_total.values
+    values = annual_total.dropna().values
+
+    # Fallback: if no usable history, use a synthetic normal distribution
+    if len(values) == 0:
+        rng = np.random.default_rng(42)
+        total_return = sum(synthetic_assets.get(k, 0.10) * v for k, v in weights.items())
+        values = rng.normal(loc=total_return, scale=0.12, size=10)
+
+    return values
 
 
 def run_simulation(
