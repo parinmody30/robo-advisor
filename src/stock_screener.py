@@ -472,7 +472,7 @@ def build_equity_basket(
                 "etf_name":            etf_name,
                 "etf_ticker":          etf_ticker,
                 "etf_reason":          etf_reason,
-                "action": f"⏳ {months_needed}mo to save  |  💡 ETF available ↓",
+                "action": f"⏳ {months_needed}mo to save  |  💡 See ETF alternative below",
             })
 
     extra = df.apply(_affordability, axis=1)

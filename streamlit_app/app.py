@@ -577,7 +577,7 @@ with t2:
                 total_investable   = basket["actual_invest_inr"].sum()
                 total_alloc        = basket["monthly_amt_inr"].sum()
                 rollover           = int(total_alloc - total_investable)
-                unaffordable_count = int((basket.get("affordable", pd.Series([True]*len(basket))) == False).sum())
+                unaffordable_count = int((~basket["affordable"].astype(bool)).sum()) if "affordable" in basket.columns else 0
                 c1, c2, c3 = st.columns(3)
                 c1.metric("Investable this month",  f"₹{int(total_investable):,}")
                 c2.metric("Accumulation pool",       f"₹{rollover:,}",
@@ -587,9 +587,11 @@ with t2:
 
             # Side-by-side decision cards for unaffordable stocks
             if "affordable" in basket.columns:
-                unaffordable = basket[basket["affordable"] == False]
+                unaffordable = basket[~basket["affordable"].astype(bool)]
                 if not unaffordable.empty:
-                    with st.expander(f"📋 {len(unaffordable)} stock(s) where monthly allocation < share price — pick an option"):
+                    st.markdown(f'<div class="section-title">Stocks Needing a Decision ({len(unaffordable)})</div>', unsafe_allow_html=True)
+                    st.caption("Your monthly allocation is less than the share price for these stocks. Choose one of the two options below for each.")
+                    with st.expander("View options", expanded=True):
                         for _, row in unaffordable.iterrows():
                             name   = row.get("name", "")
                             price  = row.get("current_price", 0)
