@@ -31,35 +31,85 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #1E1B4B 0%, #312E81 100%);
-    border-right: 1px solid #3730A3;
+    background: linear-gradient(160deg, #13112E 0%, #1E1B4B 40%, #1a1836 100%);
+    border-right: 1px solid rgba(99,102,241,0.25);
 }
 [data-testid="stSidebar"] * { color: #C7D2FE !important; }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 { color: #EEF2FF !important; letter-spacing: 0.02em; }
+[data-testid="stSidebar"] h3 { color: #EEF2FF !important; }
+
+/* Section group labels */
+[data-testid="stSidebar"] .stMarkdown strong {
+    color: #818CF8 !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+}
+
+/* Input labels */
 [data-testid="stSidebar"] .stSlider > label,
 [data-testid="stSidebar"] .stSelectbox > label,
 [data-testid="stSidebar"] .stNumberInput > label,
-[data-testid="stSidebar"] .stTextInput > label { color: #A5B4FC !important; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
-[data-testid="stSidebar"] [data-baseweb="select"] > div,
-[data-testid="stSidebar"] input {
-    background: #3730A3 !important; border-color: #4F46E5 !important; color: #EEF2FF !important;
+[data-testid="stSidebar"] .stTextInput > label {
+    color: #A5B4FC !important; font-size: 0.75rem !important;
+    text-transform: uppercase !important; letter-spacing: 0.07em !important;
+    font-weight: 600 !important;
 }
+
+/* Inputs & dropdowns */
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.07) !important;
+    border: 1px solid rgba(129,140,248,0.35) !important;
+    border-radius: 8px !important; color: #EEF2FF !important;
+    backdrop-filter: blur(4px) !important;
+}
+[data-testid="stSidebar"] input {
+    background: rgba(255,255,255,0.07) !important;
+    border: 1px solid rgba(129,140,248,0.35) !important;
+    border-radius: 8px !important; color: #EEF2FF !important;
+}
+[data-testid="stSidebar"] input:focus,
+[data-testid="stSidebar"] [data-baseweb="select"] > div:focus-within {
+    border-color: #818CF8 !important;
+    box-shadow: 0 0 0 3px rgba(129,140,248,0.2) !important;
+}
+
+/* Slider track */
+[data-testid="stSidebar"] [data-testid="stSlider"] > div > div > div {
+    background: rgba(255,255,255,0.12) !important;
+}
+[data-testid="stSidebar"] [data-testid="stSlider"] [role="slider"] {
+    background: #818CF8 !important;
+    box-shadow: 0 0 0 3px rgba(129,140,248,0.3) !important;
+}
+
+/* Slider value text */
+[data-testid="stSidebar"] [data-testid="stSlider"] p {
+    color: #EEF2FF !important; font-weight: 600 !important;
+}
+
+/* CTA Button */
 [data-testid="stSidebar"] .stButton > button {
-    background: linear-gradient(135deg, #4F46E5, #4338CA) !important;
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #14B8A6 100%) !important;
     color: white !important; border: none !important;
-    border-radius: 10px !important; font-weight: 600 !important;
-    font-size: 0.95rem !important; padding: 0.6rem 1rem !important;
-    letter-spacing: 0.03em !important;
-    box-shadow: 0 4px 14px rgba(79,70,229,0.45) !important;
+    border-radius: 10px !important; font-weight: 700 !important;
+    font-size: 0.92rem !important; padding: 0.65rem 1rem !important;
+    letter-spacing: 0.04em !important;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.5) !important;
     transition: all 0.2s !important;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 6px 20px rgba(79,70,229,0.6) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 28px rgba(99,102,241,0.65) !important;
 }
-[data-testid="stSidebar"] hr { border-color: #3730A3 !important; }
+
+/* Dividers */
+[data-testid="stSidebar"] hr {
+    border: none !important;
+    border-top: 1px solid rgba(129,140,248,0.2) !important;
+    margin: 4px 0 !important;
+}
 
 /* ── Main background ── */
 [data-testid="stAppViewContainer"] > .main { background: #F8FAFC; }
@@ -150,9 +200,17 @@ hr { border-color: #E2E8F0 !important; }
 # ── Sidebar inputs ────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div style='padding: 20px 4px 12px 4px;'>
-        <div style='font-size:1.25rem; font-weight:700; color:#F1F5F9; letter-spacing:-0.01em;'>Robo-Advisor</div>
-        <div style='font-size:0.75rem; color:#64748B; margin-top:2px; text-transform:uppercase; letter-spacing:0.08em;'>Goal-Based Portfolio Planner</div>
+    <div style='padding:24px 4px 16px 4px;'>
+        <div style='display:flex;align-items:center;gap:10px;'>
+            <div style='width:36px;height:36px;border-radius:10px;
+                background:linear-gradient(135deg,#6366F1,#14B8A6);
+                display:flex;align-items:center;justify-content:center;
+                font-size:1.1rem;flex-shrink:0;'>◈</div>
+            <div>
+                <div style='font-size:1.1rem;font-weight:800;color:#EEF2FF;letter-spacing:-0.02em;line-height:1.1;'>Robo-Advisor</div>
+                <div style='font-size:0.62rem;color:#818CF8;text-transform:uppercase;letter-spacing:0.1em;margin-top:1px;'>Goal-Based Portfolio Planner</div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     st.divider()
