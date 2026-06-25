@@ -2,9 +2,17 @@
 Stock Screener
 --------------
 Curated universe of ~80 quality Indian stocks, organised into tiers.
-Given a risk persona, screens the relevant tier(s) using live yfinance
-fundamentals (beta, PE, D/E, 6-month momentum) and returns a ranked
-basket to fill the equity allocation.
+Given a risk persona, screens using an 8-factor composite model:
+
+  Valuation  : P/E ratio, EV/EBITDA, Price-to-Book
+  Quality    : ROE (return on equity), net profit margin
+  Growth     : revenue growth (YoY)
+  Leverage   : Debt/Equity ratio, current ratio
+  Risk       : Beta (vs Nifty 50)
+  Momentum   : 6-month price return
+
+Factor weights differ per persona — conservative tilts toward
+quality/low-beta; aggressive tilts toward growth/momentum.
 """
 
 import pandas as pd
@@ -118,26 +126,46 @@ SCREEN_CONFIG = {
 
 @dataclass
 class StockInfo:
-    name:       str
-    ticker:     str
-    tier:       str
-    beta:       float = np.nan
-    pe:         float = np.nan
-    de:         float = np.nan
-    momentum_6m: float = np.nan
-    score:      float = np.nan
+    name:           str
+    ticker:         str
+    tier:           str
+    # Factor 1 — Risk
+    beta:           float = np.nan
+    # Factor 2 — Valuation
+    pe:             float = np.nan
+    ev_ebitda:      float = np.nan
+    pb:             float = np.nan
+    # Factor 3 — Quality
+    roe:            float = np.nan
+    net_margin:     float = np.nan
+    # Factor 4 — Growth
+    revenue_growth: float = np.nan
+    # Factor 5 — Leverage
+    de:             float = np.nan
+    current_ratio:  float = np.nan
+    # Factor 6 — Momentum
+    momentum_6m:    float = np.nan
+    # Output
+    score:          float = np.nan
 
 
 def _fetch_fundamentals(ticker: str) -> dict:
     try:
         info = yf.Ticker(ticker).info
         return {
-            "beta": info.get("beta", np.nan),
-            "pe":   info.get("trailingPE", np.nan),
-            "de":   info.get("debtToEquity", np.nan),
+            "beta":           info.get("beta",                  np.nan),
+            "pe":             info.get("trailingPE",            np.nan),
+            "ev_ebitda":      info.get("enterpriseToEbitda",    np.nan),
+            "pb":             info.get("priceToBook",           np.nan),
+            "roe":            info.get("returnOnEquity",        np.nan),
+            "net_margin":     info.get("profitMargins",         np.nan),
+            "revenue_growth": info.get("revenueGrowth",        np.nan),
+            "de":             info.get("debtToEquity",          np.nan),
+            "current_ratio":  info.get("currentRatio",         np.nan),
         }
     except Exception:
-        return {"beta": np.nan, "pe": np.nan, "de": np.nan}
+        return {k: np.nan for k in ["beta","pe","ev_ebitda","pb","roe",
+                                     "net_margin","revenue_growth","de","current_ratio"]}
 
 
 def _fetch_momentum(ticker: str, months: int = 6) -> float:
@@ -164,39 +192,98 @@ def fetch_stock_universe(persona: str) -> list[StockInfo]:
 
     print(f"Fetching data for {len(universe)} stocks ({persona} universe)…")
     for s in universe:
-        funda = _fetch_fundamentals(s.ticker)
-        s.beta = funda["beta"]
-        s.pe   = funda["pe"]
-        s.de   = funda["de"] / 100 if not np.isnan(funda["de"]) else np.nan  # yfinance gives D/E * 100
-        s.momentum_6m = _fetch_momentum(s.ticker)
+        f = _fetch_fundamentals(s.ticker)
+        s.beta           = f["beta"]
+        s.pe             = f["pe"]
+        s.ev_ebitda      = f["ev_ebitda"]
+        s.pb             = f["pb"]
+        s.roe            = f["roe"]
+        s.net_margin     = f["net_margin"]
+        s.revenue_growth = f["revenue_growth"]
+        s.de             = f["de"] / 100 if not np.isnan(f["de"]) else np.nan
+        s.current_ratio  = f["current_ratio"]
+        s.momentum_6m    = _fetch_momentum(s.ticker)
 
     return universe
 
 
 # ── Screening & ranking ───────────────────────────────────────────────────────
 
-def _composite_score(s: StockInfo, cfg: dict) -> float:
+# Per-persona factor weights — how much each factor contributes to the score
+FACTOR_WEIGHTS = {
+    #                      conservative  balanced  aggressive
+    "beta_low":           [  3.0,         2.0,       0.5  ],  # reward low beta
+    "pe_low":             [  2.5,         1.5,       0.5  ],  # reward low PE
+    "ev_ebitda_low":      [  2.0,         1.5,       0.5  ],  # reward low EV/EBITDA
+    "pb_low":             [  1.5,         1.0,       0.5  ],  # reward low PB (value)
+    "roe_high":           [  3.0,         2.5,       2.0  ],  # reward high ROE
+    "margin_high":        [  2.5,         2.0,       1.5  ],  # reward high net margin
+    "revenue_growth_high":[  1.0,         2.0,       3.5  ],  # reward revenue growth
+    "de_low":             [  3.0,         2.0,       1.0  ],  # reward low leverage
+    "current_ratio_high": [  2.0,         1.5,       1.0  ],  # reward liquidity
+    "momentum_high":      [  0.5,         2.0,       3.5  ],  # reward price momentum
+}
+PERSONA_IDX = {"Conservative": 0, "Balanced": 1, "Aggressive": 2}
+
+
+def _composite_score(s: StockInfo, persona: str) -> float:
     """
-    Higher is better. Penalises high beta, high PE, high D/E.
-    Rewards positive 6-month momentum.
+    8-factor composite score with persona-specific weights.
+    Each factor is normalised to a 0-10 signal before weighting.
+    Higher final score = better stock for this persona.
     """
+    idx = PERSONA_IDX.get(persona, 1)
+    w   = {k: v[idx] for k, v in FACTOR_WEIGHTS.items()}
     score = 0.0
 
-    # Beta: lower is better for conservative, neutral for aggressive
+    # 1. Beta — reward low beta (signal: max(0, 2-beta) capped at 2)
     if not np.isnan(s.beta):
-        score += max(0, (2 - s.beta) * 20)
+        score += w["beta_low"] * max(0, min(2.0, 2.0 - s.beta)) * 5
 
-    # Momentum: positive momentum rewarded
-    if not np.isnan(s.momentum_6m):
-        score += s.momentum_6m * 50
-
-    # PE: penalise extreme valuations
+    # 2. PE — reward reasonable valuation (signal decays above 25)
     if not np.isnan(s.pe) and s.pe > 0:
-        score -= max(0, (s.pe - 25) * 0.3)
+        pe_signal = max(0, 10 - max(0, (s.pe - 15) * 0.2))
+        score += w["pe_low"] * pe_signal
 
-    # D/E: penalise high leverage
+    # 3. EV/EBITDA — reward <15, penalise >25
+    if not np.isnan(s.ev_ebitda) and s.ev_ebitda > 0:
+        ev_signal = max(0, 10 - max(0, (s.ev_ebitda - 10) * 0.4))
+        score += w["ev_ebitda_low"] * ev_signal
+
+    # 4. Price-to-Book — reward low PB (value factor)
+    if not np.isnan(s.pb) and s.pb > 0:
+        pb_signal = max(0, 10 - min(10, s.pb * 1.5))
+        score += w["pb_low"] * pb_signal
+
+    # 5. ROE — reward high ROE (>15% is good, >25% is excellent)
+    if not np.isnan(s.roe):
+        roe_signal = min(10, max(0, s.roe * 100 * 0.4))
+        score += w["roe_high"] * roe_signal
+
+    # 6. Net profit margin — reward higher margins
+    if not np.isnan(s.net_margin):
+        margin_signal = min(10, max(0, s.net_margin * 100 * 0.5))
+        score += w["margin_high"] * margin_signal
+
+    # 7. Revenue growth — reward positive YoY growth
+    if not np.isnan(s.revenue_growth):
+        growth_signal = min(10, max(0, s.revenue_growth * 100 * 0.4))
+        score += w["revenue_growth_high"] * growth_signal
+
+    # 8. Debt/Equity — reward low leverage
     if not np.isnan(s.de):
-        score -= s.de * 5
+        de_signal = max(0, 10 - min(10, s.de * 4))
+        score += w["de_low"] * de_signal
+
+    # 9. Current ratio — reward >1.5 (healthy liquidity)
+    if not np.isnan(s.current_ratio):
+        cr_signal = min(10, max(0, (s.current_ratio - 0.5) * 2.5))
+        score += w["current_ratio_high"] * cr_signal
+
+    # 10. 6-month momentum — reward positive price trend
+    if not np.isnan(s.momentum_6m):
+        mom_signal = min(10, max(0, s.momentum_6m * 100 * 0.4 + 5))
+        score += w["momentum_high"] * mom_signal
 
     return round(score, 2)
 
@@ -219,7 +306,7 @@ def screen_stocks(persona: str, universe: list[StockInfo] = None) -> pd.DataFram
         mom_ok  = np.isnan(s.momentum_6m) or s.momentum_6m > -0.30  # drop stocks down >30%
 
         if beta_ok and pe_ok and de_ok and mom_ok:
-            s.score = _composite_score(s, cfg)
+            s.score = _composite_score(s, persona)
             filtered.append(s)
 
     df = pd.DataFrame([s.__dict__ for s in filtered])

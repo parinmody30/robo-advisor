@@ -253,30 +253,52 @@ with t2:
             screened = screen_stocks(profile.persona, universe)
             basket   = build_equity_basket(screened, eq_pct, monthly_savings)
 
-            display = basket[[
-                "name", "tier", "beta", "pe", "momentum_6m",
-                "equity_weight_pct", "portfolio_weight_pct", "monthly_amt_inr"
-            ]].copy()
-            display["momentum_6m"] = display["momentum_6m"].apply(
-                lambda x: f"{x*100:.1f}%" if not pd.isna(x) else "—"
-            )
-            display["beta"] = display["beta"].apply(
-                lambda x: f"{x:.2f}" if not pd.isna(x) else "—"
-            )
-            display["pe"] = display["pe"].apply(
-                lambda x: f"{x:.1f}" if not pd.isna(x) else "—"
-            )
+            def fmt(val, pct=False, x2=False, na="—"):
+                if pd.isna(val): return na
+                if pct:  return f"{val*100:.1f}%"
+                if x2:   return f"{val:.2f}"
+                return f"{val:.1f}"
+
+            display = basket.copy()
+            for col, kw in [
+                ("beta",           {"x2": True}),
+                ("pe",             {}),
+                ("ev_ebitda",      {}),
+                ("pb",             {"x2": True}),
+                ("roe",            {"pct": True}),
+                ("net_margin",     {"pct": True}),
+                ("revenue_growth", {"pct": True}),
+                ("de",             {"x2": True}),
+                ("current_ratio",  {"x2": True}),
+                ("momentum_6m",    {"pct": True}),
+            ]:
+                if col in display.columns:
+                    display[col] = display[col].apply(lambda x, k=kw: fmt(x, **k))
+
             display["monthly_amt_inr"] = display["monthly_amt_inr"].apply(
-                lambda x: f"₹{x:,}"
+                lambda x: f"₹{int(x):,}"
             )
+
+            show = ["name","tier","beta","pe","ev_ebitda","pb",
+                    "roe","net_margin","revenue_growth",
+                    "de","current_ratio","momentum_6m",
+                    "portfolio_weight_pct","monthly_amt_inr"]
+            show = [c for c in show if c in display.columns]
+
             st.dataframe(
-                display.rename(columns={
+                display[show].rename(columns={
                     "name":                "Company",
                     "tier":                "Cap",
                     "beta":                "Beta",
                     "pe":                  "P/E",
+                    "ev_ebitda":           "EV/EBITDA",
+                    "pb":                  "P/B",
+                    "roe":                 "ROE",
+                    "net_margin":          "Net Margin",
+                    "revenue_growth":      "Rev Growth",
+                    "de":                  "D/E",
+                    "current_ratio":       "Curr Ratio",
                     "momentum_6m":         "6m Return",
-                    "equity_weight_pct":   "Equity %",
                     "portfolio_weight_pct":"Portfolio %",
                     "monthly_amt_inr":     "Invest/Month",
                 }),
