@@ -70,7 +70,7 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 [data-testid="stSidebar"] textarea,
 [data-testid="stSidebar"] [data-baseweb="input"] input,
 [data-testid="stSidebar"] [data-baseweb="textarea"] textarea {
-    background: rgba(255,255,255,0.07) !important;
+    background: #0F0E2A !important;
     border: 1px solid rgba(129,140,248,0.35) !important;
     border-radius: 8px !important;
     color: #EEF2FF !important;
@@ -79,16 +79,14 @@ html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
 }
 [data-testid="stSidebar"] input::placeholder,
 [data-testid="stSidebar"] textarea::placeholder {
-    color: rgba(165,180,252,0.45) !important;
-    -webkit-text-fill-color: rgba(165,180,252,0.45) !important;
+    color: #6366F1 !important;
+    -webkit-text-fill-color: #6366F1 !important;
 }
-/* override any autofill background that turns it white */
 [data-testid="stSidebar"] input:-webkit-autofill,
 [data-testid="stSidebar"] input:-webkit-autofill:hover,
 [data-testid="stSidebar"] input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 100px #2D2B6B inset !important;
+    -webkit-box-shadow: 0 0 0 100px #0F0E2A inset !important;
     -webkit-text-fill-color: #EEF2FF !important;
-    caret-color: #A5B4FC !important;
 }
 [data-testid="stSidebar"] input:focus,
 [data-testid="stSidebar"] [data-baseweb="select"] > div:focus-within {
