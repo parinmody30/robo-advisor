@@ -348,18 +348,17 @@ with t2:
                             col_a, col_b = st.columns(2)
                             with col_a:
                                 st.info(
-                                    f"**⏳ Option A — Accumulate & buy directly**\n\n"
-                                    f"Park ₹{amt:,}/month in a liquid fund for "
-                                    f"**{months} month{'s' if months>1 else ''}**, then "
-                                    f"buy 1 share of {name}.\n\n"
-                                    f"*Best if you want this specific stock in your portfolio.*"
+                                    f"**⏳ Option A — Save up, then buy the stock directly**\n\n"
+                                    f"Put ₹{amt:,} aside every month into a **Liquid Fund**.\n\n"
+                                    f"After **{months} month{'s' if months>1 else ''}** you'll have ~₹{amt*months:,} — enough to buy **1 share of {name}** at ₹{price:,.0f}.\n\n"
+                                    f"You own the actual stock. Full upside, full downside."
                                 )
                             with col_b:
                                 st.success(
-                                    f"**💡 Option B — Start SIP in sector ETF now**\n\n"
-                                    f"Invest ₹{amt:,}/month in **{etf}** ({etf_t}).\n\n"
-                                    f"{reason}\n\n"
-                                    f"*Best for immediate exposure — no waiting, ₹1 minimum.*"
+                                    f"**💡 Option B — Invest in a sector ETF right now**\n\n"
+                                    f"Start a ₹{amt:,}/month SIP in **{etf}** (ticker: `{etf_t}`) today — no waiting.\n\n"
+                                    f"This ETF holds {name} + other top stocks in the same sector, so you get the same exposure at a fraction of the price.\n\n"
+                                    f"Minimum investment: ₹500. Highly liquid, can sell anytime."
                                 )
                             st.divider()
         except Exception as e:
