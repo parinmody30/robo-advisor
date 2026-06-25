@@ -26,27 +26,138 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    .metric-card {
-        background: #f8f9fa; border-radius: 12px;
-        padding: 16px 20px; margin: 8px 0;
-    }
-    .persona-badge {
-        display: inline-block; padding: 6px 18px;
-        border-radius: 20px; font-weight: 700;
-        font-size: 1.1rem; margin-top: 8px;
-    }
-    .conservative { background:#E8F5E9; color:#1B5E20; }
-    .balanced     { background:#E3F2FD; color:#0D47A1; }
-    .aggressive   { background:#FFF3E0; color:#E65100; }
+/* ── Global ── */
+html, body, [class*="css"] { font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0D1B2A 0%, #1B2B3B 100%);
+    border-right: 1px solid #1e3a5f;
+}
+[data-testid="stSidebar"] * { color: #CBD5E1 !important; }
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 { color: #F1F5F9 !important; letter-spacing: 0.02em; }
+[data-testid="stSidebar"] .stSlider > label,
+[data-testid="stSidebar"] .stSelectbox > label,
+[data-testid="stSidebar"] .stNumberInput > label,
+[data-testid="stSidebar"] .stTextInput > label { color: #94A3B8 !important; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+[data-testid="stSidebar"] [data-baseweb="select"] > div,
+[data-testid="stSidebar"] input {
+    background: #1e3a5f !important; border-color: #2d5180 !important; color: #F1F5F9 !important;
+}
+[data-testid="stSidebar"] .stButton > button {
+    background: linear-gradient(135deg, #1565C0, #0D47A1) !important;
+    color: white !important; border: none !important;
+    border-radius: 10px !important; font-weight: 600 !important;
+    font-size: 0.95rem !important; padding: 0.6rem 1rem !important;
+    letter-spacing: 0.03em !important;
+    box-shadow: 0 4px 14px rgba(21,101,192,0.4) !important;
+    transition: all 0.2s !important;
+}
+[data-testid="stSidebar"] .stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(21,101,192,0.5) !important;
+}
+[data-testid="stSidebar"] hr { border-color: #1e3a5f !important; }
+
+/* ── Main background ── */
+[data-testid="stAppViewContainer"] > .main { background: #F8FAFC; }
+[data-testid="stHeader"] { background: transparent; }
+
+/* ── Hero header ── */
+.hero {
+    background: linear-gradient(135deg, #0D1B2A 0%, #1565C0 60%, #1976D2 100%);
+    border-radius: 16px; padding: 36px 40px; margin-bottom: 28px;
+    box-shadow: 0 8px 32px rgba(13,27,42,0.18);
+}
+.hero h1 { color: #fff; font-size: 2rem; font-weight: 700; margin: 0 0 6px 0; letter-spacing: -0.02em; }
+.hero p  { color: #90CAF9; margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; }
+
+/* ── Stat chips on landing ── */
+.chip-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
+.chip {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px; padding: 6px 18px; color: #fff;
+    font-size: 0.82rem; font-weight: 500; backdrop-filter: blur(4px);
+}
+
+/* ── Stat cards (metric replacement) ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card {
+    background: #fff; border-radius: 12px; padding: 18px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #E2E8F0;
+    transition: box-shadow 0.2s;
+}
+.stat-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.10); }
+.stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; font-weight: 600; margin-bottom: 6px; }
+.stat-value { font-size: 1.55rem; font-weight: 700; color: #0F172A; line-height: 1; }
+.stat-sub   { font-size: 0.78rem; color: #64748B; margin-top: 4px; }
+
+/* ── Section headers ── */
+.section-title {
+    font-size: 1.05rem; font-weight: 700; color: #0F172A;
+    letter-spacing: -0.01em; margin: 28px 0 14px 0;
+    padding-bottom: 8px; border-bottom: 2px solid #E2E8F0;
+}
+
+/* ── Persona badge ── */
+.persona-card {
+    border-radius: 14px; padding: 22px 26px;
+    border-left: 5px solid; margin-top: 8px;
+}
+.persona-conservative { background:#F0FDF4; border-color:#22C55E; }
+.persona-balanced     { background:#EFF6FF; border-color:#3B82F6; }
+.persona-aggressive   { background:#FFF7ED; border-color:#F97316; }
+.persona-name  { font-size: 1.3rem; font-weight: 700; color: #0F172A; margin: 0 0 6px 0; }
+.persona-meta  { font-size: 0.85rem; color: #64748B; line-height: 1.7; }
+.persona-meta b { color: #0F172A; }
+
+/* ── Risk meter ── */
+.risk-bar-wrap { background: linear-gradient(90deg,#22C55E,#EAB308,#EF4444); height: 6px; border-radius: 6px; margin: 8px 0 4px 0; }
+
+/* ── Option cards ── */
+.opt-card {
+    border-radius: 12px; padding: 18px 20px;
+    border: 1px solid; margin-bottom: 8px;
+}
+.opt-a { background:#EFF6FF; border-color:#BFDBFE; }
+.opt-b { background:#F0FDF4; border-color:#BBF7D0; }
+.opt-title { font-weight: 700; font-size: 0.9rem; color: #0F172A; margin-bottom: 6px; }
+.opt-body  { font-size: 0.84rem; color: #475569; line-height: 1.6; }
+
+/* ── Tab styling ── */
+.stTabs [data-baseweb="tab-list"] {
+    background: #F1F5F9; border-radius: 10px; padding: 4px; gap: 2px;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 7px; font-weight: 500; font-size: 0.85rem;
+    color: #64748B; padding: 8px 18px;
+}
+.stTabs [aria-selected="true"] {
+    background: #fff !important; color: #1565C0 !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] { border-radius: 10px; overflow: hidden; }
+
+/* ── Divider ── */
+hr { border-color: #E2E8F0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ── Sidebar inputs ────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/investment-portfolio.png", width=60)
-    st.title("Your Profile")
+    st.markdown("""
+    <div style='padding: 20px 4px 12px 4px;'>
+        <div style='font-size:1.25rem; font-weight:700; color:#F1F5F9; letter-spacing:-0.01em;'>Robo-Advisor</div>
+        <div style='font-size:0.75rem; color:#64748B; margin-top:2px; text-transform:uppercase; letter-spacing:0.08em;'>Goal-Based Portfolio Planner</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.divider()
 
-    st.subheader("📋 Your Profile")
+    st.markdown("**PROFILE**")
     age              = st.slider("Age", 20, 65, 28)
     income_stability = st.selectbox("Income stability",
                                      [1, 2, 3],
@@ -55,48 +166,67 @@ with st.sidebar:
     dependents       = st.slider("Financial dependents", 0, 5, 0)
     horizon_years    = st.slider("Investment horizon (years)", 3, 35, 15)
 
-    st.subheader("🧠 Risk Appetite")
+    st.divider()
+    st.markdown("**RISK APPETITE**")
     risk_appetite = st.slider(
-        "How comfortable are you if your portfolio drops 20% temporarily?",
+        "Comfort with a 20% portfolio drop",
         min_value=1, max_value=10, value=5,
-        help="1 = Very uncomfortable, sell immediately · 10 = Totally fine, buy more"
+        help="1 = Sell immediately   ·   10 = Buy more"
     )
-    st.caption({
-        range(1,  4): "😟 Low — you prefer capital safety over growth",
-        range(4,  7): "😐 Moderate — you can handle some swings",
-        range(7, 11): "😎 High — short-term drops don't worry you",
-    }.get(next((r for r in [range(1,4),range(4,7),range(7,11)] if risk_appetite in r), range(4,7)), ""))
+    _risk_label, _risk_color = (
+        ("Low — prefer capital safety", "#EF4444") if risk_appetite <= 3 else
+        ("Moderate — can handle swings", "#EAB308") if risk_appetite <= 6 else
+        ("High — drops don't worry you", "#22C55E")
+    )
+    st.markdown(f"""
+    <div style='display:flex;align-items:center;gap:8px;margin-top:-6px;margin-bottom:4px;'>
+        <div style='width:8px;height:8px;border-radius:50%;background:{_risk_color};flex-shrink:0;'></div>
+        <span style='font-size:0.78rem;color:#94A3B8;'>{_risk_label}</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.subheader("🎯 Goals & Savings")
+    st.divider()
+    st.markdown("**SAVINGS & GOALS**")
     monthly_savings = st.number_input("Monthly savings (₹)", 1000, 500000, 25000, step=1000)
-
-    st.subheader("📌 Primary Goal")
-    goal_name   = st.text_input("Goal name", "Retirement Corpus")
+    goal_name   = st.text_input("Primary goal", "Retirement Corpus")
     goal_amount = st.number_input("Target amount today (₹)", 100000, 100000000, 10000000, step=100000)
-    goal_inf    = 0.06  # defaulted to 6% India average
+    goal_inf    = 0.06
 
-    st.subheader("➕ Additional Goals")
-    add_goal2 = st.checkbox("Add Goal 2")
+    add_goal2 = st.checkbox("Add a second goal")
     goal2_name, goal2_amount, goal2_years, goal2_inf = "", 0, 5, 0.06
     if add_goal2:
         goal2_name   = st.text_input("Goal 2 name", "House Down Payment")
         goal2_amount = st.number_input("Goal 2 amount (₹)", 100000, 50000000, 2000000, step=100000)
         goal2_years  = st.slider("Goal 2 horizon (years)", 1, 30, 7)
-        goal2_inf    = 0.06  # defaulted
+        goal2_inf    = 0.06
 
-    run_btn = st.button("🚀 Generate My Plan", type="primary", use_container_width=True)
+    st.divider()
+    run_btn = st.button("Generate My Plan", type="primary", use_container_width=True)
 
 # ── Main area ─────────────────────────────────────────────────────────────────
-st.title("📈 Goal-Based Robo-Advisor")
-st.caption("Powered by Markowitz MVO · Monte Carlo Simulation · Indian Asset Markets")
+st.markdown("""
+<div class="hero">
+    <h1>Goal-Based Robo-Advisor</h1>
+    <p>Markowitz MVO &nbsp;·&nbsp; Monte Carlo Simulation &nbsp;·&nbsp; Indian Asset Markets &nbsp;·&nbsp; 80-Stock Universe</p>
+    <div class="chip-row">
+        <span class="chip">13 Asset Classes</span>
+        <span class="chip">80 Stocks Screened</span>
+        <span class="chip">10,000 MC Paths</span>
+        <span class="chip">8-Factor Scoring</span>
+        <span class="chip">Glide Path &amp; Rebalancing</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 if not run_btn:
-    st.info("👈 Fill in your profile on the left and click **Generate My Plan**.")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Asset Classes", "13", "equity, debt, gold, fixed")
-    col2.metric("Stocks Universe", "80", "large, mid, small cap")
-    col3.metric("MC Simulations", "10,000", "paths per goal")
-    col4.metric("Horizon Support", "Up to 35yr", "with glide path")
+    st.markdown("""
+    <div style='background:#fff;border-radius:14px;padding:32px 36px;border:1px solid #E2E8F0;
+                box-shadow:0 2px 12px rgba(0,0,0,0.05);text-align:center;margin-top:8px;'>
+        <div style='font-size:2.5rem;margin-bottom:12px;'>←</div>
+        <div style='font-size:1.1rem;font-weight:600;color:#0F172A;margin-bottom:6px;'>Fill in your profile to get started</div>
+        <div style='font-size:0.88rem;color:#64748B;'>Enter your age, risk appetite, savings amount and goal — then click <b>Generate My Plan</b>.</div>
+    </div>
+    """, unsafe_allow_html=True)
     st.stop()
 
 # ── Compute everything ────────────────────────────────────────────────────────
@@ -149,55 +279,108 @@ eq_pct = total_equity_weight(opt["weights"]) * 100
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 t1, t2, t3, t4, t5 = st.tabs([
-    "👤 Profile", "📊 Allocation", "🎯 Goals",
-    "🎲 Projections", "🔄 Rebalancing"
+    "Profile", "Allocation", "Goals", "Projections", "Rebalancing"
 ])
 
 # ─────────────────────────── TAB 1: PROFILE ──────────────────────────────────
 with t1:
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Risk Persona", profile.persona)
-    c2.metric("Combined Score", f"{profile.combined_score} / 10")
-    c3.metric("Target Return", f"{profile.target_return*100:.0f}% p.a.")
+    _persona_cls = profile.persona.lower()
+    _persona_icons = {"Conservative": "Shield", "Balanced": "Scale", "Aggressive": "Rocket"}
+    st.markdown(f"""
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Risk Persona</div>
+            <div class="stat-value" style="font-size:1.3rem;">{profile.persona}</div>
+            <div class="stat-sub">Based on capacity + tolerance</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Combined Score</div>
+            <div class="stat-value">{profile.combined_score}<span style="font-size:1rem;color:#94A3B8;font-weight:400"> / 10</span></div>
+            <div class="stat-sub">Capacity {profile.capacity_score} · Tolerance {profile.tolerance_score}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Target Return</div>
+            <div class="stat-value">{profile.target_return*100:.0f}<span style="font-size:1rem;color:#94A3B8;font-weight:400">% p.a.</span></div>
+            <div class="stat-sub">Expected annualised</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Investment Horizon</div>
+            <div class="stat-value">{horizon_years}<span style="font-size:1rem;color:#94A3B8;font-weight:400"> yrs</span></div>
+            <div class="stat-sub">Glide path active</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col_a, col_b = st.columns(2)
+    col_a, col_b = st.columns([1.2, 0.8])
     with col_a:
         fig = go.Figure(go.Bar(
             x=["Capacity", "Tolerance", "Combined"],
             y=[profile.capacity_score, profile.tolerance_score, profile.combined_score],
-            marker_color=["#4CAF50", "#2196F3", "#FF9800"],
+            marker_color=["#22C55E", "#3B82F6", "#F97316"],
             text=[f"{v:.1f}" for v in [profile.capacity_score, profile.tolerance_score, profile.combined_score]],
             textposition="outside",
         ))
-        fig.update_layout(title="Risk Score Breakdown", yaxis=dict(range=[0,11]),
-                          template="plotly_white", height=360)
+        fig.update_layout(
+            title=dict(text="Risk Score Breakdown", font=dict(size=15, color="#0F172A")),
+            yaxis=dict(range=[0,11], gridcolor="#F1F5F9"),
+            plot_bgcolor="#fff", paper_bgcolor="#fff",
+            font=dict(color="#64748B"), height=340,
+            margin=dict(t=50, b=20, l=20, r=20),
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
+        _pc = {"Conservative":"persona-conservative","Balanced":"persona-balanced","Aggressive":"persona-aggressive"}
+        _alert = ""
         if profile.tolerance_score > profile.capacity_score:
-            st.warning("⚠️ Your **tolerance** exceeds your **capacity** — you *want* more risk than you can financially afford. Capacity is the hard ceiling.")
-        else:
-            st.success("✅ Capacity and tolerance are aligned.")
-
-        persona_color = {"Conservative":"#E8F5E9","Balanced":"#E3F2FD","Aggressive":"#FFF3E0"}
+            _alert = f"<div style='background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:12px 14px;font-size:0.82rem;color:#92400E;margin-bottom:12px;'><b>Note:</b> Your risk appetite exceeds your financial capacity. Capacity sets the hard ceiling.</div>"
         st.markdown(f"""
-        <div style='background:{persona_color.get(profile.persona,"#eee")};
-                    border-radius:12px; padding:20px; margin-top:12px;'>
-            <h3 style='margin:0'>{profile.persona} Investor</h3>
-            <p style='color:#555; margin:8px 0 0 0'>
-                Target return: <b>{profile.target_return*100:.0f}% p.a.</b><br>
-                Capacity: <b>{profile.capacity_score}/10</b> &nbsp;|&nbsp;
-                Tolerance: <b>{profile.tolerance_score}/10</b>
-            </p>
-        </div>""", unsafe_allow_html=True)
+        {_alert}
+        <div class="persona-card {_pc.get(profile.persona,'persona-balanced')}">
+            <div class="persona-name">{profile.persona} Investor</div>
+            <div class="persona-meta">
+                Target return &nbsp;<b>{profile.target_return*100:.0f}% p.a.</b><br>
+                Capacity score &nbsp;<b>{profile.capacity_score} / 10</b><br>
+                Tolerance score &nbsp;<b>{profile.tolerance_score} / 10</b><br>
+                Monthly savings &nbsp;<b>₹{monthly_savings:,}</b>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ─────────────────────────── TAB 2: ALLOCATION ───────────────────────────────
 with t2:
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Expected Return", f"{opt['expected_return']*100:.1f}%")
-    m2.metric("Volatility",      f"{opt['volatility']*100:.1f}%")
-    m3.metric("Sharpe Ratio",    f"{opt['sharpe_ratio']:.2f}")
-    m4.metric("Total Equity",    f"{eq_pct:.1f}%")
+    st.markdown(f"""
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Expected Return</div>
+            <div class="stat-value">{opt['expected_return']*100:.1f}<span style="font-size:1rem;color:#94A3B8;font-weight:400">%</span></div>
+            <div class="stat-sub">Annualised</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Volatility</div>
+            <div class="stat-value">{opt['volatility']*100:.1f}<span style="font-size:1rem;color:#94A3B8;font-weight:400">%</span></div>
+            <div class="stat-sub">Annualised std dev</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Sharpe Ratio</div>
+            <div class="stat-value">{opt['sharpe_ratio']:.2f}</div>
+            <div class="stat-sub">Risk-adjusted return</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Equity Allocation</div>
+            <div class="stat-value">{eq_pct:.1f}<span style="font-size:1rem;color:#94A3B8;font-weight:400">%</span></div>
+            <div class="stat-sub">of total portfolio</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    _chart_layout = dict(
+        plot_bgcolor="#fff", paper_bgcolor="#fff",
+        font=dict(color="#64748B", size=12),
+        margin=dict(t=50, b=20, l=20, r=20),
+        xaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0"),
+        yaxis=dict(gridcolor="#F1F5F9", linecolor="#E2E8F0"),
+    )
 
     col1, col2 = st.columns([1.1, 0.9])
     with col1:
@@ -206,13 +389,16 @@ with t2:
         colors = [ASSET_COLORS.get(k,"#888") for k in opt["weights"]]
         fig2 = go.Figure(go.Pie(labels=labels, values=values,
                                  marker_colors=colors,
-                                 textinfo="label+percent", hole=0.38))
-        fig2.update_layout(title="Optimal Asset Allocation",
-                           template="plotly_white", height=460)
+                                 textinfo="label+percent", hole=0.42,
+                                 marker=dict(line=dict(color="#fff", width=2))))
+        fig2.update_layout(title=dict(text="Optimal Asset Allocation", font=dict(size=15,color="#0F172A")),
+                           paper_bgcolor="#fff", height=460,
+                           margin=dict(t=50, b=20, l=20, r=20),
+                           legend=dict(font=dict(size=11, color="#64748B")))
         st.plotly_chart(fig2, use_container_width=True)
 
     with col2:
-        st.subheader("Allocation breakdown")
+        st.markdown('<div class="section-title">Allocation Breakdown</div>', unsafe_allow_html=True)
         rows = [{
             "Asset":        ASSET_LABELS.get(k, k),
             "Weight":       f"{v*100:.1f}%",
@@ -229,15 +415,17 @@ with t2:
                                line=dict(color="#1565C0", width=3)))
     fig3.add_trace(go.Scatter(x=[opt["volatility"]*100], y=[opt["expected_return"]*100],
                                mode="markers+text", name="Your Portfolio",
-                               marker=dict(size=14, color="#E53935", symbol="star"),
+                               marker=dict(size=14, color="#EF4444", symbol="star"),
                                text=[profile.persona], textposition="top right"))
-    fig3.update_layout(title="Efficient Frontier", xaxis_title="Volatility %",
-                       yaxis_title="Expected Return %",
-                       template="plotly_white", height=420)
+    fig3.update_layout(
+        title=dict(text="Efficient Frontier — Where Your Portfolio Sits", font=dict(size=15,color="#0F172A")),
+        xaxis_title="Volatility %", yaxis_title="Expected Return %",
+        height=420, **_chart_layout
+    )
     st.plotly_chart(fig3, use_container_width=True)
 
     # Stock basket
-    st.subheader(f"📋 Recommended Stocks for Equity Bucket ({eq_pct:.0f}% of portfolio)")
+    st.markdown(f'<div class="section-title">Recommended Stocks — Equity Bucket ({eq_pct:.0f}% of portfolio)</div>', unsafe_allow_html=True)
     with st.spinner("Screening stocks…"):
         try:
             universe = fetch_stock_universe(profile.persona)
@@ -357,6 +545,7 @@ with t2:
 
 # ─────────────────────────── TAB 3: GOALS ────────────────────────────────────
 with t3:
+    st.markdown('<div class="section-title">Goal Summary</div>', unsafe_allow_html=True)
     df_goals = pd.DataFrame(summary_table(planned_goals))
     st.dataframe(df_goals, use_container_width=True, hide_index=True)
 
@@ -372,7 +561,7 @@ with t3:
         fig4.add_hline(y=monthly_savings, line_dash="dash", line_color="#1565C0",
                        annotation_text=f"Your savings ₹{monthly_savings:,}/mo")
         fig4.update_layout(title="SIP Required vs Your Savings",
-                           yaxis_title="₹/month", template="plotly_white", height=400)
+                           yaxis_title="₹/month", plot_bgcolor="#fff", paper_bgcolor="#fff", height=400)
         st.plotly_chart(fig4, use_container_width=True)
 
     with col2:
@@ -384,7 +573,7 @@ with t3:
                                x=g_names, y=[g.future_value for g in planned_goals],
                                marker_color="#EF5350"))
         fig5.update_layout(barmode="group", title="Inflation Impact",
-                           yaxis_title="₹", template="plotly_white", height=400)
+                           yaxis_title="₹", plot_bgcolor="#fff", paper_bgcolor="#fff", height=400)
         st.plotly_chart(fig5, use_container_width=True)
 
 # ─────────────────────────── TAB 4: PROJECTIONS ──────────────────────────────
@@ -422,7 +611,7 @@ with t4:
     fig6.update_layout(
         title=f"{primary.name} — Monte Carlo Projection ({mc.prob_success}% success)",
         xaxis_title="Years", yaxis_title="Portfolio Value (₹)",
-        template="plotly_white", height=480,
+        plot_bgcolor="#fff", paper_bgcolor="#fff", height=480,
     )
     st.plotly_chart(fig6, use_container_width=True)
 
@@ -433,7 +622,7 @@ with t4:
                    annotation_text="Target")
     fig7.update_layout(title="Terminal Wealth Distribution",
                        xaxis_title="₹ Lakhs", yaxis_title="# simulations",
-                       template="plotly_white", height=360)
+                       plot_bgcolor="#fff", paper_bgcolor="#fff", height=360)
     st.plotly_chart(fig7, use_container_width=True)
 
 # ─────────────────────────── TAB 5: REBALANCING ──────────────────────────────
@@ -451,11 +640,11 @@ with t5:
                                    fill="tozeroy", fillcolor="rgba(46,125,50,0.12)"))
         fig8.update_layout(title="Glide Path",
                            xaxis_title="Years", yaxis_title="Allocation %",
-                           template="plotly_white", height=400)
+                           plot_bgcolor="#fff", paper_bgcolor="#fff", height=400)
         st.plotly_chart(fig8, use_container_width=True)
 
     with col2:
-        st.subheader("Drift Simulator")
+        st.markdown('<div class="section-title">Drift Simulator</div>', unsafe_allow_html=True)
         bull_years = st.slider("Simulate bull run (years)", 1, 5, 3)
         portfolio_val = st.number_input("Portfolio value (₹)", 100000, 50000000, 1000000, step=50000)
 
@@ -470,9 +659,15 @@ with t5:
         df_reb  = rebalance_summary(actions)
 
         if df_reb.empty:
-            st.success(f"✅ No rebalancing needed after {bull_years}-year bull run.")
+            st.markdown(f"""<div style='background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;
+                padding:14px 18px;color:#166534;font-size:0.88rem;'>
+                No rebalancing needed after a {bull_years}-year bull run — all assets within ±5% of target.</div>""",
+                unsafe_allow_html=True)
         else:
-            st.warning(f"⚠️ Rebalancing needed after {bull_years}-year bull run:")
+            st.markdown(f"""<div style='background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;
+                padding:14px 18px;color:#92400E;font-size:0.88rem;margin-bottom:12px;'>
+                Rebalancing required after {bull_years}-year bull run.</div>""",
+                unsafe_allow_html=True)
             st.dataframe(df_reb, use_container_width=True, hide_index=True)
 
     # Drift bar chart
@@ -488,5 +683,5 @@ with t5:
                            marker_color="#E53935", opacity=0.85))
     fig9.update_layout(barmode="group", title="Portfolio Drift",
                        xaxis_tickangle=-35, yaxis_title="Weight %",
-                       template="plotly_white", height=420)
+                       plot_bgcolor="#fff", paper_bgcolor="#fff", height=420)
     st.plotly_chart(fig9, use_container_width=True)
